@@ -103,7 +103,11 @@ function createFilesContext(files: FileMap) {
   return `Below are the code files present in the webcontainer:\ncode format:\n<line number>|<line content>\n <codebase>${fileContexts.join('\n\n')}\n\n</codebase>`;
 }
 
-function extractPropertiesFromMessage(message: Message): { model: string; provider: string; content: string | { type: 'image'; url: string } } {
+function extractPropertiesFromMessage(message: Message): {
+  model: string;
+  provider: string;
+  content: string | { type: 'image'; url: string };
+} {
   const textContent = Array.isArray(message.content)
     ? message.content.find((item) => item.type === 'text')?.text || ''
     : message.content;
@@ -113,7 +117,7 @@ function extractPropertiesFromMessage(message: Message): { model: string; provid
     return {
       model: DEFAULT_MODEL,
       provider: DEFAULT_PROVIDER.name,
-      content: message.content // Return the image content directly
+      content: message.content, // Return the image content directly
     };
   }
 
@@ -142,7 +146,7 @@ export async function streamText(props: {
   let currentModel = DEFAULT_MODEL;
   let currentProvider = DEFAULT_PROVIDER.name;
   const MODEL_LIST = await getModelList({ apiKeys, providerSettings, serverEnv: serverEnv as any });
-  
+
   const processedMessages = messages.map((message) => {
     if (message.role === 'user') {
       const { model, provider, content } = extractPropertiesFromMessage(message);
@@ -169,12 +173,13 @@ export async function streamText(props: {
 
   const provider = PROVIDER_LIST.find((p) => p.name === currentProvider) || DEFAULT_PROVIDER;
 
-  let systemPrompt = PromptLibrary.getPropmtFromLibrary(promptId || 'default', {
+  let systemPrompt =
+    PromptLibrary.getPropmtFromLibrary(promptId || 'default', {
       cwd: WORK_DIR,
       allowedHtmlElements: allowedHTMLElements,
       modificationTagName: MODIFICATIONS_TAG_NAME,
-  }) ?? getSystemPrompt();
-  
+    }) ?? getSystemPrompt();
+
   let codeContext = '';
 
   if (files) {
